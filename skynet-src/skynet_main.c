@@ -76,11 +76,13 @@ _init_env(lua_State *L) {
 }
 
 int sigign() {
+#ifndef _MSC_VER
 	struct sigaction sa;
 	sa.sa_handler = SIG_IGN;
 	sa.sa_flags = 0;
 	sigemptyset(&sa.sa_mask);
 	sigaction(SIGPIPE, &sa, 0);
+#endif // _MSC_VER
 	return 0;
 }
 
@@ -93,7 +95,7 @@ static const char * load_config = "\
 		local last_path = current_path\n\
 		local path, name = filename:match([[(.*]]..sep..[[)(.*)$]])\n\
 		if path then\n\
-			if path:sub(1,1) == sep then	-- root\n\
+			if path:sub(1,1) == sep or path:sub(1,1) ~= '.' then	-- root\n\
 				current_path = path\n\
 			else\n\
 				current_path = current_path .. path\n\

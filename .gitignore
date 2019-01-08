@@ -9,3 +9,8 @@
 *.so
 *.dSYM
 .DS_Store
+.vs
+/out
+*.user
+/x86
+/x64

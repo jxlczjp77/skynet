@@ -5,6 +5,9 @@
 #include <lauxlib.h>
 
 #include <time.h>
+#ifdef _MSC_VER
+#include <sys/timeb.h>
+#endif
 
 #if defined(__APPLE__)
 #include <mach/task.h>
@@ -18,7 +21,11 @@
 
 static double
 get_time() {
-#if  !defined(__APPLE__)
+#ifdef _MSC_VER
+	struct _timeb timebuffer;
+	_ftime_s(&timebuffer);
+	return (double)timebuffer.time + (double)timebuffer.millitm / 1000;
+#elif !defined(__APPLE__)
 	struct timespec ti;
 	clock_gettime(CLOCK_THREAD_CPUTIME_ID, &ti);
 

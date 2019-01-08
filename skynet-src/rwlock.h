@@ -1,7 +1,40 @@
 #ifndef SKYNET_RWLOCK_H
 #define SKYNET_RWLOCK_H
 
-#ifndef USE_PTHREAD_LOCK
+#ifdef _MSC_VER
+#include <windows.h>
+
+struct rwlock {
+	SRWLOCK ll;
+};
+
+static inline void
+rwlock_init(struct rwlock *lock) {
+	InitializeSRWLock(&lock->ll);
+}
+
+static inline void
+rwlock_rlock(struct rwlock *lock) {
+	AcquireSRWLockShared(&lock->ll);
+}
+
+static inline void
+rwlock_wlock(struct rwlock *lock) {
+	AcquireSRWLockExclusive(&lock->ll);
+}
+
+static inline void
+rwlock_wunlock(struct rwlock *lock) {
+	ReleaseSRWLockExclusive(&lock->ll);
+}
+
+
+static inline void
+rwlock_runlock(struct rwlock *lock) {
+	ReleaseSRWLockShared(&lock->ll);
+}
+
+#elif !define(USE_PTHREAD_LOCK)
 
 struct rwlock {
 	int write;

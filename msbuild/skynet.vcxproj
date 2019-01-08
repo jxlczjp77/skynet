@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>15.0</VCProjectVersion>
+    <ProjectGuid>{DA19C0A1-9E33-412F-8E53-449A01C13421}</ProjectGuid>
+    <RootNamespace>skynet</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>$(SolutionDir)out\bin\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)out\obj\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>$(SolutionDir)out\bin\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)out\obj\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(SolutionDir)out\bin\$(Platform)\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)out\obj\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IntDir>$(SolutionDir)out\obj\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
+    <OutDir>$(SolutionDir)out\bin\$(Platform)\$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\3rd\lua;$(ProjectDir)..\3rd\libuv\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>NOUSE_JEMALLOC;_CRT_SECURE_NO_WARNINGS;LUA_BUILD_AS_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>$(OutDir)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libuv.lib;lua.lib;ws2_32.lib;iphlpapi.lib;psapi.lib;Userenv.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ModuleDefinitionFile>
+      </ModuleDefinitionFile>
+      <AdditionalOptions>/export:skynet_error /export:skynet_command /export:skynet_queryname /export:skynet_send /export:skynet_sendname /export:skynet_isremote /export:skynet_callback /export:skynet_current_handle /export:skynet_now /export:skynet_debug_memory /export:skynet_malloc /export:skynet_free  /export:skynet_lalloc /export:malloc_current_memory /export:dump_mem_lua /export:dump_c_mem /export:memory_info_dump /export:malloc_used_memory /export:malloc_memory_block /export:skynet_socket_send /export:skynet_socket_send_lowpriority /export:skynet_socket_listen /export:skynet_socket_connect /export:skynet_socket_bind /export:skynet_socket_close /export:skynet_socket_shutdown /export:skynet_socket_start /export:skynet_socket_nodelay /export:skynet_socket_udp /export:skynet_socket_udp_connect /export:skynet_socket_udp_send /export:skynet_socket_udp_address /export:skynet_socket_info /export:socket_info_release /export:skynet_harbor_start /export:skynet_realloc %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\3rd\lua;$(ProjectDir)..\3rd\libuv\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>NOUSE_JEMALLOC;_CRT_SECURE_NO_WARNINGS;LUA_BUILD_AS_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <ModuleDefinitionFile>
+      </ModuleDefinitionFile>
+      <AdditionalLibraryDirectories>$(OutDir)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libuv.lib;lua.lib;ws2_32.lib;iphlpapi.lib;psapi.lib;Userenv.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalOptions>/export:skynet_error /export:skynet_command /export:skynet_queryname /export:skynet_send /export:skynet_sendname /export:skynet_isremote /export:skynet_callback /export:skynet_current_handle /export:skynet_now /export:skynet_debug_memory /export:skynet_malloc /export:skynet_free  /export:skynet_lalloc /export:malloc_current_memory /export:dump_mem_lua /export:dump_c_mem /export:memory_info_dump /export:malloc_used_memory /export:malloc_memory_block /export:skynet_socket_send /export:skynet_socket_send_lowpriority /export:skynet_socket_listen /export:skynet_socket_connect /export:skynet_socket_bind /export:skynet_socket_close /export:skynet_socket_shutdown /export:skynet_socket_start /export:skynet_socket_nodelay /export:skynet_socket_udp /export:skynet_socket_udp_connect /export:skynet_socket_udp_send /export:skynet_socket_udp_address /export:skynet_socket_info /export:socket_info_release /export:skynet_harbor_start /export:skynet_realloc %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\3rd\lua;$(ProjectDir)..\3rd\libuv\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>NOUSE_JEMALLOC;_CRT_SECURE_NO_WARNINGS;LUA_BUILD_AS_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>libuv.lib;lua.lib;ws2_32.lib;iphlpapi.lib;psapi.lib;Userenv.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(OutDir)</AdditionalLibraryDirectories>
+      <ModuleDefinitionFile>
+      </ModuleDefinitionFile>
+      <AdditionalOptions>/export:skynet_error /export:skynet_command /export:skynet_queryname /export:skynet_send /export:skynet_sendname /export:skynet_isremote /export:skynet_callback /export:skynet_current_handle /export:skynet_now /export:skynet_debug_memory /export:skynet_malloc /export:skynet_free  /export:skynet_lalloc /export:malloc_current_memory /export:dump_mem_lua /export:dump_c_mem /export:memory_info_dump /export:malloc_used_memory /export:malloc_memory_block /export:skynet_socket_send /export:skynet_socket_send_lowpriority /export:skynet_socket_listen /export:skynet_socket_connect /export:skynet_socket_bind /export:skynet_socket_close /export:skynet_socket_shutdown /export:skynet_socket_start /export:skynet_socket_nodelay /export:skynet_socket_udp /export:skynet_socket_udp_connect /export:skynet_socket_udp_send /export:skynet_socket_udp_address /export:skynet_socket_info /export:socket_info_release /export:skynet_harbor_start /export:skynet_realloc %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>$(ProjectDir)..\3rd\lua;$(ProjectDir)..\3rd\libuv\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>NOUSE_JEMALLOC;_CRT_SECURE_NO_WARNINGS;LUA_BUILD_AS_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <ModuleDefinitionFile>
+      </ModuleDefinitionFile>
+      <AdditionalLibraryDirectories>$(OutDir)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libuv.lib;lua.lib;ws2_32.lib;iphlpapi.lib;psapi.lib;Userenv.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalOptions>/export:skynet_error /export:skynet_command /export:skynet_queryname /export:skynet_send /export:skynet_sendname /export:skynet_isremote /export:skynet_callback /export:skynet_current_handle /export:skynet_now /export:skynet_debug_memory /export:skynet_malloc /export:skynet_free  /export:skynet_lalloc /export:malloc_current_memory /export:dump_mem_lua /export:dump_c_mem /export:memory_info_dump /export:malloc_used_memory /export:malloc_memory_block /export:skynet_socket_send /export:skynet_socket_send_lowpriority /export:skynet_socket_listen /export:skynet_socket_connect /export:skynet_socket_bind /export:skynet_socket_close /export:skynet_socket_shutdown /export:skynet_socket_start /export:skynet_socket_nodelay /export:skynet_socket_udp /export:skynet_socket_udp_connect /export:skynet_socket_udp_send /export:skynet_socket_udp_address /export:skynet_socket_info /export:socket_info_release /export:skynet_harbor_start /export:skynet_realloc %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="..\skynet-src\array.h" />
+    <ClInclude Include="..\skynet-src\atomic.h" />
+    <ClInclude Include="..\skynet-src\luashrtbl.h" />
+    <ClInclude Include="..\skynet-src\malloc_hook.h" />
+    <ClInclude Include="..\skynet-src\rwlock.h" />
+    <ClInclude Include="..\skynet-src\skynet.h" />
+    <ClInclude Include="..\skynet-src\skynet_daemon.h" />
+    <ClInclude Include="..\skynet-src\skynet_env.h" />
+    <ClInclude Include="..\skynet-src\skynet_handle.h" />
+    <ClInclude Include="..\skynet-src\skynet_harbor.h" />
+    <ClInclude Include="..\skynet-src\skynet_imp.h" />
+    <ClInclude Include="..\skynet-src\skynet_log.h" />
+    <ClInclude Include="..\skynet-src\skynet_malloc.h" />
+    <ClInclude Include="..\skynet-src\skynet_module.h" />
+    <ClInclude Include="..\skynet-src\skynet_monitor.h" />
+    <ClInclude Include="..\skynet-src\skynet_mq.h" />
+    <ClInclude Include="..\skynet-src\skynet_server.h" />
+    <ClInclude Include="..\skynet-src\skynet_socket.h" />
+    <ClInclude Include="..\skynet-src\skynet_timer.h" />
+    <ClInclude Include="..\skynet-src\socket_epoll.h" />
+    <ClInclude Include="..\skynet-src\socket_info.h" />
+    <ClInclude Include="..\skynet-src\socket_kqueue.h" />
+    <ClInclude Include="..\skynet-src\socket_poll.h" />
+    <ClInclude Include="..\skynet-src\socket_server.h" />
+    <ClInclude Include="..\skynet-src\spinlock.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\skynet-src\malloc_hook.c" />
+    <ClCompile Include="..\skynet-src\skynet_env.c" />
+    <ClCompile Include="..\skynet-src\skynet_error.c" />
+    <ClCompile Include="..\skynet-src\skynet_handle.c" />
+    <ClCompile Include="..\skynet-src\skynet_harbor.c" />
+    <ClCompile Include="..\skynet-src\skynet_log.c" />
+    <ClCompile Include="..\skynet-src\skynet_main.c" />
+    <ClCompile Include="..\skynet-src\skynet_module.c" />
+    <ClCompile Include="..\skynet-src\skynet_monitor.c" />
+    <ClCompile Include="..\skynet-src\skynet_mq.c" />
+    <ClCompile Include="..\skynet-src\skynet_server.c" />
+    <ClCompile Include="..\skynet-src\skynet_socket.c" />
+    <ClCompile Include="..\skynet-src\skynet_start.c" />
+    <ClCompile Include="..\skynet-src\skynet_timer.c" />
+    <ClCompile Include="..\skynet-src\socket_server_win.c" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

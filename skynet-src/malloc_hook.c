@@ -9,6 +9,10 @@
 #include "skynet.h"
 #include "atomic.h"
 
+#ifdef _MSC_VER
+#define ssize_t size_t
+#endif
+
 // turn on MEMORY_CHECK can do more memory check, such as double free
 // #define MEMORY_CHECK
 
@@ -239,6 +243,23 @@ mallctl_opt(const char* name, int* newval) {
 	skynet_error(NULL, "No jemalloc : mallctl_opt %s.", name);
 	return 0;
 }
+#ifdef _MSC_VER
+void * skynet_malloc(size_t sz) {
+	return malloc(sz);
+}
+
+void * skynet_calloc(size_t nmemb, size_t size) {
+	return calloc(nmemb, size);
+}
+
+void * skynet_realloc(void *ptr, size_t size) {
+	return realloc(ptr, size);
+}
+
+void skynet_free(void *ptr) {
+	free(ptr);
+}
+#endif
 
 #endif
 

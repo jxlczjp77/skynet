@@ -11,6 +11,10 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdint.h>
+#ifdef _MSC_VER
+#include <sys/timeb.h>
+#endif // _MSC_VER
+
 
 #if defined(__APPLE__)
 #include <AvailabilityMacros.h>
@@ -44,7 +48,7 @@ struct link_list {
 };
 
 struct timer {
-	struct link_list near[TIME_NEAR];
+	struct link_list near_[TIME_NEAR];
 	struct link_list t[4][TIME_LEVEL];
 	struct spinlock lock;
 	uint32_t time;
@@ -77,7 +81,7 @@ add_node(struct timer *T,struct timer_node *node) {
 	uint32_t current_time=T->time;
 	
 	if ((time|TIME_NEAR_MASK)==(current_time|TIME_NEAR_MASK)) {
-		link(&T->near[time&TIME_NEAR_MASK],node);
+		link(&T->near_[time&TIME_NEAR_MASK],node);
 	} else {
 		int i;
 		uint32_t mask=TIME_NEAR << TIME_LEVEL_SHIFT;
@@ -160,8 +164,8 @@ static inline void
 timer_execute(struct timer *T) {
 	int idx = T->time & TIME_NEAR_MASK;
 	
-	while (T->near[idx].head.next) {
-		struct timer_node *current = link_clear(&T->near[idx]);
+	while (T->near_[idx].head.next) {
+		struct timer_node *current = link_clear(&T->near_[idx]);
 		SPIN_UNLOCK(T);
 		// dispatch_list don't need lock T
 		dispatch_list(current);
@@ -192,7 +196,7 @@ timer_create_timer() {
 	int i,j;
 
 	for (i=0;i<TIME_NEAR;i++) {
-		link_clear(&r->near[i]);
+		link_clear(&r->near_[i]);
 	}
 
 	for (i=0;i<4;i++) {
@@ -233,7 +237,12 @@ skynet_timeout(uint32_t handle, int time, int session) {
 // centisecond: 1/100 second
 static void
 systime(uint32_t *sec, uint32_t *cs) {
-#if !defined(__APPLE__) || defined(AVAILABLE_MAC_OS_X_VERSION_10_12_AND_LATER)
+#ifdef _MSC_VER
+	struct _timeb timebuffer;
+	_ftime_s(&timebuffer);
+	*sec = (uint32_t)timebuffer.time;
+	*cs = timebuffer.millitm / 10;
+#elif !defined(__APPLE__) || defined(AVAILABLE_MAC_OS_X_VERSION_10_12_AND_LATER)
 	struct timespec ti;
 	clock_gettime(CLOCK_REALTIME, &ti);
 	*sec = (uint32_t)ti.tv_sec;
@@ -249,7 +258,12 @@ systime(uint32_t *sec, uint32_t *cs) {
 static uint64_t
 gettime() {
 	uint64_t t;
-#if !defined(__APPLE__) || defined(AVAILABLE_MAC_OS_X_VERSION_10_12_AND_LATER)
+#ifdef _MSC_VER
+	struct _timeb timebuffer;
+	_ftime_s(&timebuffer);
+	t = timebuffer.time * 100;
+	t += timebuffer.millitm / 10;
+#elif !defined(__APPLE__) || defined(AVAILABLE_MAC_OS_X_VERSION_10_12_AND_LATER)
 	struct timespec ti;
 	clock_gettime(CLOCK_MONOTONIC, &ti);
 	t = (uint64_t)ti.tv_sec * 100;
@@ -306,7 +320,18 @@ skynet_timer_init(void) {
 
 uint64_t
 skynet_thread_time(void) {
-#if  !defined(__APPLE__) || defined(AVAILABLE_MAC_OS_X_VERSION_10_12_AND_LATER)
+#ifdef _MSC_VER
+	LARGE_INTEGER time, freq;
+	if (!QueryPerformanceFrequency(&freq)) {
+		//  Handle error
+		return 0;
+	}
+	if (!QueryPerformanceCounter(&time)) {
+		//  Handle error
+		return 0;
+	}
+	return (uint64_t)((double)time.QuadPart / freq.QuadPart);
+#elif !defined(__APPLE__) || defined(AVAILABLE_MAC_OS_X_VERSION_10_12_AND_LATER)
 	struct timespec ti;
 	clock_gettime(CLOCK_THREAD_CPUTIME_ID, &ti);
 

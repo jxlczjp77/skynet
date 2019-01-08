@@ -3,7 +3,9 @@
 // only for debug use
 #include <lua.h>
 #include <lauxlib.h>
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif // !_MSC_VER
 #include <stdlib.h>
 #include <string.h>
 #include "spinlock.h"
@@ -74,8 +76,13 @@ channel_read(struct channel *c, double timeout) {
 	SPIN_LOCK(c)
 	if (c->head == NULL) {
 		SPIN_UNLOCK(c)
+#ifdef _MSC_VER
+		int ti = (int)(timeout * 100);
+		Sleep(ti);
+#else
 		int ti = (int)(timeout * 100000);
 		usleep(ti);
+#endif // _MSC_VER
 		return NULL;
 	}
 	ret = c->head;

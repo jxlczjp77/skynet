@@ -20,11 +20,25 @@
 #endif
 
 #include "skynet.h"
+#ifdef _MSC_VER
+#include <windows.h>
+#endif
 
 // return nsec
 static int64_t
 get_time() {
-#if !defined(__APPLE__) || defined(AVAILABLE_MAC_OS_X_VERSION_10_12_AND_LATER)
+#ifdef _MSC_VER
+	LARGE_INTEGER time, freq;
+	if (!QueryPerformanceFrequency(&freq)) {
+		//  Handle error
+		return 0;
+	}
+	if (!QueryPerformanceCounter(&time)) {
+		//  Handle error
+		return 0;
+	}
+	return (uint64_t)((double)time.QuadPart / freq.QuadPart);
+#elif !defined(__APPLE__) || defined(AVAILABLE_MAC_OS_X_VERSION_10_12_AND_LATER)
 	struct timespec ti;
 	clock_gettime(CLOCK_MONOTONIC, &ti);
 	return (int64_t)1000000000 * ti.tv_sec + ti.tv_nsec;

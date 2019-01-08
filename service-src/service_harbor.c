@@ -19,7 +19,11 @@
 #include <string.h>
 #include <assert.h>
 #include <stdint.h>
+#ifdef _MSC_VER
+#include <array.h>
+#else
 #include <unistd.h>
+#endif // _MSC_VER
 
 #define HASH_SIZE 4096
 #define DEFAULT_QUEUE_SIZE 1024
@@ -605,15 +609,26 @@ harbor_command(struct harbor * h, const char * msg, size_t sz, int session, uint
 	}
 	case 'S' :
 	case 'A' : {
-		char buffer[s+1];
+#ifdef _MSC_VER
+		struct Array tmp;
+		char *buffer = AllocArray(&tmp, s + 1);
+#else
+		char buffer[s + 1];
+#endif // _MSC_VER
 		memcpy(buffer, name, s);
 		buffer[s] = 0;
 		int fd=0, id=0;
 		sscanf(buffer, "%d %d",&fd,&id);
 		if (fd == 0 || id <= 0 || id>=REMOTE_MAX) {
+#ifdef _MSC_VER
+			FreeArray(&tmp);
+#endif // _MSC_VER
 			skynet_error(h->ctx, "Invalid command %c %s", msg[0], buffer);
 			return;
 		}
+#ifdef _MSC_VER
+		FreeArray(&tmp);
+#endif // _MSC_VER
 		struct slave * slave = &h->s[id];
 		if (slave->fd != 0) {
 			skynet_error(h->ctx, "Harbor %d alreay exist", id);

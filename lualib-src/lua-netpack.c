@@ -243,14 +243,14 @@ filter_data_(lua_State *L, int fd, uint8_t * buffer, int size) {
 		}
 		int need = uc->pack.size - uc->read;
 		if (size < need) {
-			memcpy(uc->pack.buffer + uc->read, buffer, size);
+			memcpy((char *)uc->pack.buffer + uc->read, buffer, size);
 			uc->read += size;
 			int h = hash_fd(fd);
 			uc->next = q->hash[h];
 			q->hash[h] = uc;
 			return 1;
 		}
-		memcpy(uc->pack.buffer + uc->read, buffer, need);
+		memcpy((char *)uc->pack.buffer + uc->read, buffer, need);
 		buffer += need;
 		size -= need;
 		if (size == 0) {

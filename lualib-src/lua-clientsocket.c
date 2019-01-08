@@ -8,14 +8,18 @@
 #include <lauxlib.h>
 #include <string.h>
 #include <stdint.h>
-#include <pthread.h>
 #include <stdlib.h>
-
+#ifdef _MSC_VER
+#include <windows.h>
+#else
+#include <pthread.h>
 #include <netinet/in.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <unistd.h>
+#endif // _MSC_VER
+
 #include <errno.h>
 #include <fcntl.h>
 
@@ -38,8 +42,13 @@ lconnect(lua_State *L) {
 		return luaL_error(L, "Connect %s %d failed", addr, port);
 	}
 
+#ifdef _MSC_VER
+	unsigned long ul = 1;
+	ioctlsocket(fd, FIONBIO, (unsigned long *)&ul);
+#else
 	int flag = fcntl(fd, F_GETFL, 0);
 	fcntl(fd, F_SETFL, flag | O_NONBLOCK);
+#endif // _MSC_VER
 
 	lua_pushinteger(L, fd);
 
@@ -49,8 +58,11 @@ lconnect(lua_State *L) {
 static int
 lclose(lua_State *L) {
 	int fd = luaL_checkinteger(L, 1);
+#ifdef _MSC_VER
+	closesocket(fd);
+#else
 	close(fd);
-
+#endif // _MSC_VER
 	return 0;
 }
 
@@ -122,7 +134,13 @@ lrecv(lua_State *L) {
 static int
 lusleep(lua_State *L) {
 	int n = luaL_checknumber(L, 1);
+#ifdef _MSC_VER
+	n /= 1000;
+	if (n < 20) n = 20;
+	Sleep(n);
+#else
 	usleep(n);
+#endif
 	return 0;
 }
 
@@ -131,14 +149,22 @@ lusleep(lua_State *L) {
 #define QUEUE_SIZE 1024
 
 struct queue {
+#ifdef _MSC_VER
+	CRITICAL_SECTION lock;
+#else
 	pthread_mutex_t lock;
+#endif // _MSC_VER
 	int head;
 	int tail;
 	char * queue[QUEUE_SIZE];
 };
-
+#ifdef _MSC_VER
+static DWORD WINAPI
+readline_stdin(LPVOID *arg) {
+#else
 static void *
 readline_stdin(void * arg) {
+#endif // _MSC_VER
 	struct queue * q = arg;
 	char tmp[1024];
 	while (!feof(stdin)) {
@@ -152,7 +178,12 @@ readline_stdin(void * arg) {
 		memcpy(str, tmp, n);
 		str[n] = 0;
 
+#ifdef _MSC_VER
+		EnterCriticalSection(&q->lock);
+#else
 		pthread_mutex_lock(&q->lock);
+#endif // _MSC_VER
+
 		q->queue[q->tail] = str;
 
 		if (++q->tail >= QUEUE_SIZE) {
@@ -162,7 +193,11 @@ readline_stdin(void * arg) {
 			// queue overflow
 			exit(1);
 		}
+#ifdef _MSC_VER
+		LeaveCriticalSection(&q->lock);
+#else
 		pthread_mutex_unlock(&q->lock);
+#endif // _MSC_VER
 	}
 	return NULL;
 }
@@ -170,16 +205,30 @@ readline_stdin(void * arg) {
 static int
 lreadstdin(lua_State *L) {
 	struct queue *q = lua_touserdata(L, lua_upvalueindex(1));
+	(&q->lock);
+#ifdef _MSC_VER
+	EnterCriticalSection(&q->lock);
+#else
 	pthread_mutex_lock(&q->lock);
+#endif // _MSC_VER
 	if (q->head == q->tail) {
+#ifdef _MSC_VER
+		LeaveCriticalSection(&q->lock);
+#else
 		pthread_mutex_unlock(&q->lock);
+#endif // _MSC_VER
 		return 0;
 	}
 	char * str = q->queue[q->head];
 	if (++q->head >= QUEUE_SIZE) {
 		q->head = 0;
 	}
+#ifdef _MSC_VER
+	LeaveCriticalSection(&q->lock);
+#else
 	pthread_mutex_unlock(&q->lock);
+#endif // _MSC_VER
+
 	lua_pushstring(L, str);
 	free(str);
 	return 1;
@@ -200,12 +249,20 @@ luaopen_client_socket(lua_State *L) {
 
 	struct queue * q = lua_newuserdata(L, sizeof(*q));
 	memset(q, 0, sizeof(*q));
+#ifdef _MSC_VER
+	InitializeCriticalSection(&q->lock);
+#else
 	pthread_mutex_init(&q->lock, NULL);
+#endif // _MSC_VER
 	lua_pushcclosure(L, lreadstdin, 1);
 	lua_setfield(L, -2, "readstdin");
 
-	pthread_t pid ;
+#ifdef _MSC_VER
+	CreateThread(NULL, 0, readline_stdin, q, 0, NULL);
+#else
+	pthread_t pid;
 	pthread_create(&pid, NULL, readline_stdin, q);
+#endif // _MSC_VER
 
 	return 1;
 }

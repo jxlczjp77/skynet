@@ -4,6 +4,9 @@
 #include "skynet_socket.h"
 #include <string.h>
 #include <time.h>
+#ifdef _MSC_VER
+#include "array.h"
+#endif
 
 FILE * 
 skynet_log_open(struct skynet_context * ctx, uint32_t handle) {
@@ -11,7 +14,13 @@ skynet_log_open(struct skynet_context * ctx, uint32_t handle) {
 	if (logpath == NULL)
 		return NULL;
 	size_t sz = strlen(logpath);
+#ifdef _MSC_VER
+	struct Array arr;
+	char *tmp = AllocArray(&arr, sz + 16);
+#else
 	char tmp[sz + 16];
+#endif // _MSC_VER
+
 	sprintf(tmp, "%s/%08x.log", logpath, handle);
 	FILE *f = fopen(tmp, "ab");
 	if (f) {
@@ -24,6 +33,9 @@ skynet_log_open(struct skynet_context * ctx, uint32_t handle) {
 	} else {
 		skynet_error(ctx, "Open log file %s fail", tmp);
 	}
+#ifdef _MSC_VER
+	FreeArray(&arr);
+#endif
 	return f;
 }
 

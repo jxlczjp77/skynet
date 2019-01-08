@@ -7,6 +7,9 @@
 #define SPIN_DESTROY(q) spinlock_destroy(&(q)->lock);
 
 #ifndef USE_PTHREAD_LOCK
+#ifdef _MSC_VER
+#include <windows.h>
+#endif
 
 struct spinlock {
 	int lock;
@@ -19,17 +22,29 @@ spinlock_init(struct spinlock *lock) {
 
 static inline void
 spinlock_lock(struct spinlock *lock) {
-	while (__sync_lock_test_and_set(&lock->lock,1)) {}
+#ifdef _MSC_VER
+	while (InterlockedExchange(&lock->lock, 1)) {}
+#else
+	while (__sync_lock_test_and_set(&lock->lock, 1)) {}
+#endif // _MSC_VER
 }
 
 static inline int
 spinlock_trylock(struct spinlock *lock) {
-	return __sync_lock_test_and_set(&lock->lock,1) == 0;
+#ifdef _MSC_VER
+	return InterlockedExchange(&lock->lock, 1) == 0;
+#else
+	return __sync_lock_test_and_set(&lock->lock, 1) == 0;
+#endif // _MSC_VER
 }
 
 static inline void
 spinlock_unlock(struct spinlock *lock) {
+#ifdef _MSC_VER
+	InterlockedExchange(&lock->lock, 0);
+#else
 	__sync_lock_release(&lock->lock);
+#endif // _MSC_VER
 }
 
 static inline void

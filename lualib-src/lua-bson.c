@@ -4,7 +4,9 @@
 #include <lauxlib.h>
 
 #include <time.h>
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif // _MSC_VER
 
 #include <stdint.h>
 #include <stdlib.h>
@@ -1222,7 +1224,12 @@ init_oid_header() {
 		// already init
 		return;
 	}
+#ifdef _MSC_VER
+	DWORD pid = GetProcessId(NULL);
+#else
 	pid_t pid = getpid();
+#endif // _MSC_VER
+
 	uint32_t h = 0;
 	char hostname[256];
 	if (gethostname(hostname, sizeof(hostname))==0) {

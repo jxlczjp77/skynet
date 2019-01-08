@@ -7,7 +7,12 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdlib.h>
+#ifdef _MSC_VER
+#define srandom srand
+#define random rand
+#else
 #include <unistd.h>
+#endif // _MSC_VER
 
 #define SMALL_CHUNK 256
 

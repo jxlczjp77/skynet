@@ -10,9 +10,14 @@
 
 #include <lua.h>
 #include <lauxlib.h>
-
+#ifdef _MSC_VER
+#include <WinSock2.h>
+#include <ws2tcpip.h>
+#include "array.h"
+#else
 #include <sys/socket.h>
 #include <arpa/inet.h>
+#endif // _MSC_VER
 
 #include "skynet_socket.h"
 
@@ -445,16 +450,27 @@ static int
 lconnect(lua_State *L) {
 	size_t sz = 0;
 	const char * addr = luaL_checklstring(L,1,&sz);
+#ifdef _MSC_VER
+	struct Array tmp_;
+	char *tmp = AllocArray(&tmp_, sz);
+#else
 	char tmp[sz];
+#endif // _MSC_VER
+
 	int port = 0;
 	const char * host = address_port(L, tmp, addr, 2, &port);
 	if (port == 0) {
+#ifdef _MSC_VER
+		FreeArray(&tmp_);
+#endif // _MSC_VER
 		return luaL_error(L, "Invalid port");
 	}
 	struct skynet_context * ctx = lua_touserdata(L, lua_upvalueindex(1));
 	int id = skynet_socket_connect(ctx, host, port);
 	lua_pushinteger(L, id);
-
+#ifdef _MSC_VER
+	FreeArray(&tmp_);
+#endif // _MSC_VER
 	return 1;
 }
 
@@ -605,7 +621,12 @@ ludp(lua_State *L) {
 	struct skynet_context * ctx = lua_touserdata(L, lua_upvalueindex(1));
 	size_t sz = 0;
 	const char * addr = lua_tolstring(L,1,&sz);
+#ifdef _MSC_VER
+	struct Array tmp_;
+	char *tmp = AllocArray(&tmp_, sz);
+#else
 	char tmp[sz];
+#endif // _MSC_VER
 	int port = 0;
 	const char * host = NULL;
 	if (addr) {
@@ -613,6 +634,9 @@ ludp(lua_State *L) {
 	}
 
 	int id = skynet_socket_udp(ctx, host, port);
+#ifdef _MSC_VER
+	FreeArray(&tmp_);
+#endif // _MSC_VER
 	if (id < 0) {
 		return luaL_error(L, "udp init failed");
 	}
@@ -626,7 +650,12 @@ ludp_connect(lua_State *L) {
 	int id = luaL_checkinteger(L, 1);
 	size_t sz = 0;
 	const char * addr = luaL_checklstring(L,2,&sz);
+#ifdef _MSC_VER
+	struct Array tmp_;
+	char *tmp = AllocArray(&tmp_, sz);
+#else
 	char tmp[sz];
+#endif // _MSC_VER
 	int port = 0;
 	const char * host = NULL;
 	if (addr) {
@@ -634,9 +663,14 @@ ludp_connect(lua_State *L) {
 	}
 
 	if (skynet_socket_udp_connect(ctx, id, host, port)) {
+#ifdef _MSC_VER
+		FreeArray(&tmp_);
+#endif // _MSC_VER
 		return luaL_error(L, "udp connect failed");
 	}
-
+#ifdef _MSC_VER
+	FreeArray(&tmp_);
+#endif // _MSC_VER
 	return 0;
 }
 

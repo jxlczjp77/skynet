@@ -21,11 +21,19 @@ struct socket_message {
 	int ud;	// for accept, ud is new connection id ; for data, ud is size of data 
 	char * data;
 };
-
+#ifdef _MSC_VER
+typedef void(*socket_message_cb)(int code, struct socket_message *result);
+struct socket_server * socket_server_create(uint64_t time, socket_message_cb cb);
+#else
 struct socket_server * socket_server_create(uint64_t time);
+#endif // _MSC_VER
 void socket_server_release(struct socket_server *);
 void socket_server_updatetime(struct socket_server *, uint64_t time);
+#ifdef _MSC_VER
+int socket_server_poll(struct socket_server *);
+#else
 int socket_server_poll(struct socket_server *, struct socket_message *result, int *more);
+#endif // _MSC_VER
 
 void socket_server_exit(struct socket_server *);
 void socket_server_close(struct socket_server *, uintptr_t opaque, int id);

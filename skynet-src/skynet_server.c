@@ -14,7 +14,12 @@
 #include "spinlock.h"
 #include "atomic.h"
 
+#ifdef _MSC_VER
+#include <windows.h>
+#include "array.h"
+#else
 #include <pthread.h>
+#endif // _MSC_VER
 
 #include <string.h>
 #include <assert.h>
@@ -39,6 +44,22 @@
 #define CHECKCALLING_DECL
 
 #endif
+
+#ifdef _MSC_VER
+char* strsep(char** stringp, const char* delim) {
+	char* start = *stringp;
+	char* p;
+	p = (start != NULL) ? strpbrk(start, delim) : NULL;
+	if (p == NULL) {
+		*stringp = NULL;
+	} else {
+		*p = '\0';
+		*stringp = p + 1;
+	}
+	return start;
+}
+#endif // _MSC_VER
+
 
 struct skynet_context {
 	void * instance;
@@ -65,7 +86,11 @@ struct skynet_node {
 	int total;
 	int init;
 	uint32_t monitor_exit;
+#ifdef _MSC_VER
+	DWORD handle_key;
+#else
 	pthread_key_t handle_key;
+#endif // _MSC_VER
 	bool profile;	// default is off
 };
 
@@ -89,7 +114,11 @@ context_dec() {
 uint32_t 
 skynet_current_handle(void) {
 	if (G_NODE.init) {
+#ifdef _MSC_VER
+		void * handle = TlsGetValue(G_NODE.handle_key);
+#else
 		void * handle = pthread_getspecific(G_NODE.handle_key);
+#endif // _MSC_VER
 		return (uint32_t)(uintptr_t)handle;
 	} else {
 		uint32_t v = (uint32_t)(-THREAD_MAIN);
@@ -261,7 +290,11 @@ static void
 dispatch_message(struct skynet_context *ctx, struct skynet_message *msg) {
 	assert(ctx->init);
 	CHECKCALLING_BEGIN(ctx)
-	pthread_setspecific(G_NODE.handle_key, (void *)(uintptr_t)(ctx->handle));
+#ifdef _MSC_VER
+		TlsSetValue(G_NODE.handle_key, (void *)(uintptr_t)(ctx->handle));
+#else
+		pthread_setspecific(G_NODE.handle_key, (void *)(uintptr_t)(ctx->handle));
+#endif // _MSC_VER
 	int type = msg->sz >> MESSAGE_TYPE_SHIFT;
 	size_t sz = msg->sz & MESSAGE_TYPE_MASK;
 	if (ctx->logfile) {
@@ -432,22 +465,32 @@ cmd_query(struct skynet_context * context, const char * param) {
 static const char *
 cmd_name(struct skynet_context * context, const char * param) {
 	int size = strlen(param);
-	char name[size+1];
-	char handle[size+1];
+#ifdef _MSC_VER
+	struct Array name_, handle_;
+	char *name = AllocArray(&name_, size + 1);
+	char *handle = AllocArray(&handle_, size + 1);
+#else
+	char name[size + 1];
+	char handle[size + 1];
+#endif // _MSC_VER
+	
 	sscanf(param,"%s %s",name,handle);
-	if (handle[0] != ':') {
-		return NULL;
+	const char *r = NULL;
+	if (handle[0] == ':') {
+		uint32_t handle_id = strtoul(handle + 1, NULL, 16);
+		if (handle_id != 0) {
+			if (name[0] == '.') {
+				r = skynet_handle_namehandle(handle_id, name + 1);
+			} else {
+				skynet_error(context, "Can't set global name %s in C", name);
+			}
+		}
 	}
-	uint32_t handle_id = strtoul(handle+1, NULL, 16);
-	if (handle_id == 0) {
-		return NULL;
-	}
-	if (name[0] == '.') {
-		return skynet_handle_namehandle(handle_id, name + 1);
-	} else {
-		skynet_error(context, "Can't set global name %s in C", name);
-	}
-	return NULL;
+#ifdef _MSC_VER
+	FreeArray(&name_);
+	FreeArray(&handle_);
+#endif // _MSC_VER
+	return r;
 }
 
 static const char *
@@ -482,18 +525,27 @@ cmd_kill(struct skynet_context * context, const char * param) {
 static const char *
 cmd_launch(struct skynet_context * context, const char * param) {
 	size_t sz = strlen(param);
-	char tmp[sz+1];
+#ifdef _MSC_VER
+	struct Array tmp_;
+	char *tmp = AllocArray(&tmp_, sz + 1);
+#else
+	char tmp[sz + 1];
+#endif // _MSC_VER
 	strcpy(tmp,param);
 	char * args = tmp;
 	char * mod = strsep(&args, " \t\r\n");
 	args = strsep(&args, "\r\n");
 	struct skynet_context * inst = skynet_context_new(mod,args);
+	const char *r = NULL;
 	if (inst == NULL) {
-		return NULL;
 	} else {
 		id_to_hex(context->result, inst->handle);
-		return context->result;
+		r = context->result;
 	}
+#ifdef _MSC_VER
+	FreeArray(&tmp_);
+#endif // _MSC_VER
+	return r;
 }
 
 static const char *
@@ -504,18 +556,25 @@ cmd_getenv(struct skynet_context * context, const char * param) {
 static const char *
 cmd_setenv(struct skynet_context * context, const char * param) {
 	size_t sz = strlen(param);
-	char key[sz+1];
+#ifdef _MSC_VER
+	struct Array tmp_;
+	char *key = AllocArray(&tmp_, sz + 1);
+#else
+	char key[sz + 1];
+#endif // _MSC_VER
 	int i;
 	for (i=0;param[i] != ' ' && param[i];i++) {
 		key[i] = param[i];
 	}
-	if (param[i] == '\0')
-		return NULL;
+	if (param[i] != '\0') {
+		key[i] = '\0';
+		param += i + 1;
 
-	key[i] = '\0';
-	param += i+1;
-	
-	skynet_setenv(key,param);
+		skynet_setenv(key, param);
+	}
+#ifdef _MSC_VER
+	FreeArray(&tmp_);
+#endif // _MSC_VER
 	return NULL;
 }
 
@@ -809,23 +868,36 @@ skynet_globalinit(void) {
 	G_NODE.total = 0;
 	G_NODE.monitor_exit = 0;
 	G_NODE.init = 1;
+
+#ifdef _MSC_VER
+	G_NODE.handle_key = TlsAlloc();
+#else
 	if (pthread_key_create(&G_NODE.handle_key, NULL)) {
 		fprintf(stderr, "pthread_key_create failed");
 		exit(1);
 	}
+#endif // _MSC_VER
 	// set mainthread's key
 	skynet_initthread(THREAD_MAIN);
 }
 
 void 
 skynet_globalexit(void) {
+#ifdef _MSC_VER
+	TlsFree(G_NODE.handle_key);
+#else
 	pthread_key_delete(G_NODE.handle_key);
+#endif
 }
 
 void
 skynet_initthread(int m) {
 	uintptr_t v = (uint32_t)(-m);
+#ifdef _MSC_VER
+	TlsSetValue(G_NODE.handle_key, (void *)v);
+#else
 	pthread_setspecific(G_NODE.handle_key, (void *)v);
+#endif
 }
 
 void

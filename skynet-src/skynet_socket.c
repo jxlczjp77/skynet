@@ -12,10 +12,11 @@
 #include <stdbool.h>
 
 static struct socket_server * SOCKET_SERVER = NULL;
+void socket_server_cb(int type, struct socket_message *result);
 
 void 
 skynet_socket_init() {
-	SOCKET_SERVER = socket_server_create(skynet_now());
+	SOCKET_SERVER = socket_server_create(skynet_now(), socket_server_cb);
 }
 
 void
@@ -75,45 +76,44 @@ forward_message(int type, bool padding, struct socket_message * result) {
 	}
 }
 
-int 
+int
 skynet_socket_poll() {
-	struct socket_server *ss = SOCKET_SERVER;
-	assert(ss);
-	struct socket_message result;
-	int more = 1;
-	int type = socket_server_poll(ss, &result, &more);
+	if (socket_server_poll(SOCKET_SERVER) > 0) {
+		return -1;
+	}
+	return 0;
+}
+
+void 
+socket_server_cb(int type, struct socket_message *result) {
 	switch (type) {
 	case SOCKET_EXIT:
-		return 0;
+		return;
 	case SOCKET_DATA:
-		forward_message(SKYNET_SOCKET_TYPE_DATA, false, &result);
+		forward_message(SKYNET_SOCKET_TYPE_DATA, false, result);
 		break;
 	case SOCKET_CLOSE:
-		forward_message(SKYNET_SOCKET_TYPE_CLOSE, false, &result);
+		forward_message(SKYNET_SOCKET_TYPE_CLOSE, false, result);
 		break;
 	case SOCKET_OPEN:
-		forward_message(SKYNET_SOCKET_TYPE_CONNECT, true, &result);
+		forward_message(SKYNET_SOCKET_TYPE_CONNECT, true, result);
 		break;
 	case SOCKET_ERR:
-		forward_message(SKYNET_SOCKET_TYPE_ERROR, true, &result);
+		forward_message(SKYNET_SOCKET_TYPE_ERROR, true, result);
 		break;
 	case SOCKET_ACCEPT:
-		forward_message(SKYNET_SOCKET_TYPE_ACCEPT, true, &result);
+		forward_message(SKYNET_SOCKET_TYPE_ACCEPT, true, result);
 		break;
 	case SOCKET_UDP:
-		forward_message(SKYNET_SOCKET_TYPE_UDP, false, &result);
+		forward_message(SKYNET_SOCKET_TYPE_UDP, false, result);
 		break;
 	case SOCKET_WARNING:
-		forward_message(SKYNET_SOCKET_TYPE_WARNING, false, &result);
+		forward_message(SKYNET_SOCKET_TYPE_WARNING, false, result);
 		break;
 	default:
 		skynet_error(NULL, "Unknown socket message type %d.",type);
-		return -1;
+		break;
 	}
-	if (more) {
-		return -1;
-	}
-	return 1;
 }
 
 int

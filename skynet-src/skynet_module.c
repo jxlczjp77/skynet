@@ -5,7 +5,12 @@
 
 #include <assert.h>
 #include <string.h>
+#ifdef _MSC_VER
+#include <windows.h>
+#include "array.h"
+#else
 #include <dlfcn.h>
+#endif // _MSC_VER
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -31,7 +36,12 @@ _try_open(struct modules *m, const char * name) {
 	int sz = path_size + name_size;
 	//search path
 	void * dl = NULL;
+#ifdef _MSC_VER
+	struct Array arr_;
+	char *tmp = AllocArray(&arr_, sz);
+#else
 	char tmp[sz];
+#endif // _MSC_VER
 	do
 	{
 		memset(tmp,0,sz);
@@ -51,14 +61,24 @@ _try_open(struct modules *m, const char * name) {
 			fprintf(stderr,"Invalid C service path\n");
 			exit(1);
 		}
+#ifdef _MSC_VER
+		dl = (void *)LoadLibraryA(tmp);
+#else
 		dl = dlopen(tmp, RTLD_NOW | RTLD_GLOBAL);
+#endif // _MSC_VER
 		path = l;
 	}while(dl == NULL);
 
 	if (dl == NULL) {
-		fprintf(stderr, "try open %s failed : %s\n",name,dlerror());
+#ifdef _MSC_VER
+		fprintf(stderr, "try open %s failed : %d\n", name, GetLastError());
+#else
+		fprintf(stderr, "try open %s failed : %s\n", name, dlerror());
+#endif // _MSC_VER
 	}
-
+#ifdef _MSC_VER
+	FreeArray(&arr_);
+#endif // _MSC_VER
 	return dl;
 }
 
@@ -77,7 +97,13 @@ static void *
 get_api(struct skynet_module *mod, const char *api_name) {
 	size_t name_size = strlen(mod->name);
 	size_t api_size = strlen(api_name);
+#ifdef _MSC_VER
+	struct Array arr_;
+	char *tmp = AllocArray(&arr_, name_size + api_size + 1);
+#else
 	char tmp[name_size + api_size + 1];
+#endif // _MSC_VER
+
 	memcpy(tmp, mod->name, name_size);
 	memcpy(tmp+name_size, api_name, api_size+1);
 	char *ptr = strrchr(tmp, '.');
@@ -86,7 +112,14 @@ get_api(struct skynet_module *mod, const char *api_name) {
 	} else {
 		ptr = ptr + 1;
 	}
+
+#ifdef _MSC_VER
+	void *r = (void *)GetProcAddress((HMODULE)mod->module, ptr);
+	FreeArray(&arr_);
+	return r;
+#else
 	return dlsym(mod->module, ptr);
+#endif // _MSC_VER
 }
 
 static int

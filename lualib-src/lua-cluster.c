@@ -4,7 +4,11 @@
 #include <lauxlib.h>
 #include <string.h>
 #include <assert.h>
+#ifdef _MSC_VER
+#include <windows.h>
+#else
 #include <unistd.h>
+#endif // !_MSC_VER
 
 #include "skynet.h"
 
@@ -594,7 +598,11 @@ lisname(lua_State *L) {
 
 static int
 lnodename(lua_State *L) {
+#ifdef _MSC_VER
+	DWORD pid = GetProcessId(NULL);
+#else
 	pid_t pid = getpid();
+#endif // _MSC_VER
 	char hostname[256];
 	if (gethostname(hostname, sizeof(hostname))==0) {
 		lua_pushfstring(L, "%s%d", hostname, (int)pid);

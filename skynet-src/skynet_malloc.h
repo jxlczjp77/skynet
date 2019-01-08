@@ -3,6 +3,7 @@
 
 #include <stddef.h>
 
+#ifndef _MSC_VER
 #define skynet_malloc malloc
 #define skynet_calloc calloc
 #define skynet_realloc realloc
@@ -10,6 +11,7 @@
 #define skynet_memalign memalign
 #define skynet_aligned_alloc aligned_alloc
 #define skynet_posix_memalign posix_memalign
+#endif
 
 void * skynet_malloc(size_t sz);
 void * skynet_calloc(size_t nmemb,size_t size);
