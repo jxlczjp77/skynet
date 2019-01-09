@@ -1,4 +1,4 @@
-#ifndef SKYNET_RWLOCK_H
+﻿#ifndef SKYNET_RWLOCK_H
 #define SKYNET_RWLOCK_H
 
 #ifdef _MSC_VER
@@ -34,7 +34,7 @@ rwlock_runlock(struct rwlock *lock) {
 	ReleaseSRWLockShared(&lock->ll);
 }
 
-#elif !define(USE_PTHREAD_LOCK)
+#elif !defined(USE_PTHREAD_LOCK)
 
 struct rwlock {
 	int write;

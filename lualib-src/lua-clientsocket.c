@@ -1,4 +1,4 @@
-// simple lua socket library for client
+﻿// simple lua socket library for client
 // It's only for demo, limited feature. Don't use it in your project.
 // Rewrite socket library by yourself .
 
@@ -205,7 +205,6 @@ readline_stdin(void * arg) {
 static int
 lreadstdin(lua_State *L) {
 	struct queue *q = lua_touserdata(L, lua_upvalueindex(1));
-	(&q->lock);
 #ifdef _MSC_VER
 	EnterCriticalSection(&q->lock);
 #else
