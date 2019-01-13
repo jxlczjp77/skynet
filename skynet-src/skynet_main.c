@@ -1,4 +1,4 @@
-#include "skynet.h"
+﻿#include "skynet.h"
 
 #include "skynet_imp.h"
 #include "skynet_env.h"
@@ -118,7 +118,7 @@ static const char * load_config = "\
 ";
 
 int
-main(int argc, char *argv[]) {
+skynet_main(int argc, char *argv[]) {
 	const char * config_file = NULL ;
 	if (argc > 1) {
 		config_file = argv[1];

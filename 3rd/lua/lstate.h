@@ -1,4 +1,4 @@
-/*
+﻿/*
 ** $Id: lstate.h,v 2.133.1.1 2017/04/19 17:39:34 roberto Exp $
 ** Global State
 ** See Copyright Notice in lua.h
@@ -12,6 +12,9 @@
 #include "lobject.h"
 #include "ltm.h"
 #include "lzio.h"
+#ifdef USE_LOCK
+#include <spinlock.h>
+#endif // USE_LOCK
 
 
 /*
@@ -169,6 +172,9 @@ typedef struct global_State {
   TString *tmname[TM_N];  /* array with tag-method names */
   struct Table *mt[LUA_NUMTAGS];  /* metatables for basic types */
   TString *strcache[STRCACHE_N][STRCACHE_M];  /* cache for strings in API */
+#ifdef USE_LOCK
+  struct spinlock lock;
+#endif // USER_LOCK
 } global_State;
 
 

@@ -1,4 +1,4 @@
-/*
+﻿/*
 ** $Id: lundump.c,v 2.44.1.1 2017/04/19 17:20:42 roberto Exp $
 ** load precompiled Lua chunks
 ** See Copyright Notice in lua.h
@@ -84,7 +84,9 @@ static lua_Integer LoadInteger (LoadState *S) {
   return x;
 }
 
-
+#ifdef LoadString
+#undef LoadString
+#endif
 static TString *LoadString (LoadState *S) {
   size_t size = LoadByte(S);
   if (size == 0xFF)

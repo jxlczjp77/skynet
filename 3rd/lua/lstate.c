@@ -1,4 +1,4 @@
-/*
+﻿/*
 ** $Id: lstate.c,v 2.133.1.1 2017/04/19 17:39:34 roberto Exp $
 ** Global State
 ** See Copyright Notice in lua.h
@@ -334,6 +334,9 @@ LUA_API lua_State *lua_newstate (lua_Alloc f, void *ud) {
     close_state(L);
     L = NULL;
   }
+#ifdef USE_LOCK
+  spinlock_init(&g->lock);
+#endif // USE_LOCK
   return L;
 }
 
@@ -342,6 +345,9 @@ LUA_API void lua_close (lua_State *L) {
   L = G(L)->mainthread;  /* only the main thread can be closed */
   lua_lock(L);
   close_state(L);
+#ifdef USE_LOCK
+  spinlock_destroy(&G(L)->lock);
+#endif // USE_LOCK
 }
 
 

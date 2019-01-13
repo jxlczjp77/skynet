@@ -1,4 +1,4 @@
-/*
+﻿/*
 ** $Id: llimits.h,v 1.141.1.1 2017/04/19 17:20:42 roberto Exp $
 ** Limits, basic types, and some other 'installation-dependent' definitions
 ** See Copyright Notice in lua.h
@@ -210,6 +210,12 @@ typedef unsigned long Instruction;
 ** macros that are executed whenever program enters the Lua core
 ** ('lua_lock') and leaves the core ('lua_unlock')
 */
+#ifdef USE_LOCK
+#include <spinlock.h>
+#define lua_lock(L) spinlock_lock(&G(L)->lock)
+#define lua_unlock(L) spinlock_unlock(&G(L)->lock)
+#endif // USE_LOCK
+
 #if !defined(lua_lock)
 #define lua_lock(L)	((void) 0)
 #define lua_unlock(L)	((void) 0)
