@@ -137,5 +137,8 @@
     <ClCompile Include="..\skynet-src\socket_server_win.c">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="..\skynet-src\skynet_console.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
