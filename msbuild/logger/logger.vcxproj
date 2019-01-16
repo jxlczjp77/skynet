@@ -96,7 +96,7 @@
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(OutDir)..</AdditionalLibraryDirectories>
-      <AdditionalDependencies>skynet.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>sncore.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>/export:logger_init /export:logger_create /export:logger_release %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
@@ -111,7 +111,7 @@
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(OutDir)..</AdditionalLibraryDirectories>
-      <AdditionalDependencies>skynet.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>sncore.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>/export:logger_init /export:logger_create /export:logger_release %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
@@ -130,7 +130,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>$(OutDir)..</AdditionalLibraryDirectories>
-      <AdditionalDependencies>skynet.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>sncore.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>/export:logger_init /export:logger_create /export:logger_release %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
@@ -149,7 +149,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>$(OutDir)..</AdditionalLibraryDirectories>
-      <AdditionalDependencies>skynet.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>sncore.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>/export:logger_init /export:logger_create /export:logger_release %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
