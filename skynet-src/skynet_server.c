@@ -1,4 +1,4 @@
-#include "skynet.h"
+﻿#include "skynet.h"
 
 #include "skynet_server.h"
 #include "skynet_module.h"
@@ -839,6 +839,24 @@ skynet_sendname(struct skynet_context * context, uint32_t source, const char * a
 	}
 
 	return skynet_send(context, source, des, type, session, data, sz);
+}
+
+void
+skynet_detach_queue(struct skynet_context * ctx) {
+	skynet_mq_detach(ctx->queue);
+}
+
+void
+skynet_dispatch_queue(struct skynet_context * ctx) {
+	struct message_queue *q = ctx->queue;
+	struct skynet_message msg;
+	while (skynet_mq_pop(q, &msg) == 0) {
+		if (ctx->cb == NULL) {
+			skynet_free(msg.data);
+		} else {
+			dispatch_message(ctx, &msg);
+		}
+	}
 }
 
 uint32_t 

@@ -1,4 +1,4 @@
-#include "skynet.h"
+﻿#include "skynet.h"
 #include "skynet_mq.h"
 #include "skynet_handle.h"
 #include "spinlock.h"
@@ -30,6 +30,7 @@ struct message_queue {
 	int overload_threshold;
 	struct skynet_message *queue;
 	struct message_queue *next;
+	int detached;
 };
 
 struct global_queue {
@@ -43,7 +44,9 @@ static struct global_queue *Q = NULL;
 void 
 skynet_globalmq_push(struct message_queue * queue) {
 	struct global_queue *q= Q;
-
+	if (queue->detached != 0) {
+		return;
+	}
 	SPIN_LOCK(q)
 	assert(queue->next == NULL);
 	if(q->tail) {
@@ -74,6 +77,35 @@ skynet_globalmq_pop() {
 	return mq;
 }
 
+void skynet_globalmq_remove(struct message_queue *mq) {
+	struct global_queue *q = Q;
+
+	SPIN_LOCK(q)
+	if (q->head == mq) {
+		// pop front
+		q->head = mq->next;
+		if (q->head == NULL) {
+			assert(mq == q->tail);
+			q->tail = NULL;
+		}
+	} else {
+		struct message_queue *pre_mq = q->head;
+		while (pre_mq != NULL && pre_mq->next != mq) {
+			pre_mq = pre_mq->next;
+		}
+		if (pre_mq != NULL) {
+			assert(pre_mq->next == mq);
+			pre_mq->next = mq->next;
+			if (q->tail == mq) {
+				q->tail = pre_mq;
+			}
+		}
+	}
+	mq->next = NULL;
+	mq->in_global = 0;
+	SPIN_UNLOCK(q)
+}
+
 struct message_queue * 
 skynet_mq_create(uint32_t handle) {
 	struct message_queue *q = skynet_malloc(sizeof(*q));
@@ -91,6 +123,7 @@ skynet_mq_create(uint32_t handle) {
 	q->overload_threshold = MQ_OVERLOAD;
 	q->queue = skynet_malloc(sizeof(struct skynet_message) * q->cap);
 	q->next = NULL;
+	q->detached = 0;
 
 	return q;
 }
@@ -200,11 +233,23 @@ skynet_mq_push(struct message_queue *q, struct skynet_message *message) {
 		expand_queue(q);
 	}
 
-	if (q->in_global == 0) {
+	if (q->in_global == 0 && q->detached == 0) {
 		q->in_global = MQ_IN_GLOBAL;
 		skynet_globalmq_push(q);
 	}
 	
+	SPIN_UNLOCK(q)
+}
+
+void 
+skynet_mq_detach(struct message_queue *q) {
+	SPIN_LOCK(q)
+	if (q->detached == 0) {
+		q->detached = 1;
+		if (q->in_global == MQ_IN_GLOBAL) {
+			skynet_globalmq_remove(q);
+		}
+	}
 	SPIN_UNLOCK(q)
 }
 

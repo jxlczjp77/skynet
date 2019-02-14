@@ -1,4 +1,4 @@
-#define LUA_LIB
+﻿#define LUA_LIB
 
 #include "skynet.h"
 #include "lua-seri.h"
@@ -319,6 +319,20 @@ lsend(lua_State *L) {
 	return send_message(L, 0, 2);
 }
 
+static int
+ldetachqueue(lua_State *L) {
+	struct skynet_context * context = lua_touserdata(L, lua_upvalueindex(1));
+	skynet_detach_queue(context);
+	return 0;
+}
+
+static int
+ldispatchqueue(lua_State *L) {
+	struct skynet_context * context = lua_touserdata(L, lua_upvalueindex(1));
+	skynet_dispatch_queue(context);
+	return 0;
+}
+
 /*
 	uint32 address
 	 string address
@@ -499,6 +513,8 @@ luaopen_skynet_core(lua_State *L) {
 
 	luaL_Reg l[] = {
 		{ "send" , lsend },
+		{ "detachqueue", ldetachqueue },
+		{ "dispatchqueue", ldispatchqueue },
 		{ "genid", lgenid },
 		{ "redirect", lredirect },
 		{ "command" , lcommand },

@@ -39,13 +39,13 @@
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -103,7 +103,7 @@
       <AdditionalDependencies>libuv.lib;lua.lib;ws2_32.lib;iphlpapi.lib;psapi.lib;Userenv.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>
       </ModuleDefinitionFile>
-      <AdditionalOptions>/export:skynet_error /export:skynet_command /export:skynet_queryname /export:skynet_send /export:skynet_sendname /export:skynet_isremote /export:skynet_callback /export:skynet_current_handle /export:skynet_now /export:skynet_debug_memory /export:skynet_malloc /export:skynet_free  /export:skynet_lalloc /export:malloc_current_memory /export:dump_mem_lua /export:dump_c_mem /export:memory_info_dump /export:malloc_used_memory /export:malloc_memory_block /export:skynet_socket_send /export:skynet_socket_send_lowpriority /export:skynet_socket_listen /export:skynet_socket_connect /export:skynet_socket_bind /export:skynet_socket_close /export:skynet_socket_shutdown /export:skynet_socket_start /export:skynet_socket_nodelay /export:skynet_socket_udp /export:skynet_socket_udp_connect /export:skynet_socket_udp_send /export:skynet_socket_udp_address /export:skynet_socket_info /export:socket_info_release /export:skynet_harbor_start /export:skynet_realloc /export:skynet_main %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/export:skynet_error /export:skynet_command /export:skynet_queryname /export:skynet_send /export:skynet_sendname /export:skynet_isremote /export:skynet_callback /export:skynet_current_handle /export:skynet_now /export:skynet_debug_memory /export:skynet_malloc /export:skynet_free  /export:skynet_lalloc /export:malloc_current_memory /export:dump_mem_lua /export:dump_c_mem /export:memory_info_dump /export:malloc_used_memory /export:malloc_memory_block /export:skynet_socket_send /export:skynet_socket_send_lowpriority /export:skynet_socket_listen /export:skynet_socket_connect /export:skynet_socket_bind /export:skynet_socket_close /export:skynet_socket_shutdown /export:skynet_socket_start /export:skynet_socket_nodelay /export:skynet_socket_udp /export:skynet_socket_udp_connect /export:skynet_socket_udp_send /export:skynet_socket_udp_address /export:skynet_socket_info /export:socket_info_release /export:skynet_harbor_start /export:skynet_realloc /export:skynet_main /export:skynet_detach_queue /export:skynet_dispatch_queue %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -120,7 +120,7 @@
       </ModuleDefinitionFile>
       <AdditionalLibraryDirectories>$(OutDir)</AdditionalLibraryDirectories>
       <AdditionalDependencies>libuv.lib;lua.lib;ws2_32.lib;iphlpapi.lib;psapi.lib;Userenv.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalOptions>/export:skynet_error /export:skynet_command /export:skynet_queryname /export:skynet_send /export:skynet_sendname /export:skynet_isremote /export:skynet_callback /export:skynet_current_handle /export:skynet_now /export:skynet_debug_memory /export:skynet_malloc /export:skynet_free  /export:skynet_lalloc /export:malloc_current_memory /export:dump_mem_lua /export:dump_c_mem /export:memory_info_dump /export:malloc_used_memory /export:malloc_memory_block /export:skynet_socket_send /export:skynet_socket_send_lowpriority /export:skynet_socket_listen /export:skynet_socket_connect /export:skynet_socket_bind /export:skynet_socket_close /export:skynet_socket_shutdown /export:skynet_socket_start /export:skynet_socket_nodelay /export:skynet_socket_udp /export:skynet_socket_udp_connect /export:skynet_socket_udp_send /export:skynet_socket_udp_address /export:skynet_socket_info /export:socket_info_release /export:skynet_harbor_start /export:skynet_realloc /export:skynet_main %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/export:skynet_error /export:skynet_command /export:skynet_queryname /export:skynet_send /export:skynet_sendname /export:skynet_isremote /export:skynet_callback /export:skynet_current_handle /export:skynet_now /export:skynet_debug_memory /export:skynet_malloc /export:skynet_free  /export:skynet_lalloc /export:malloc_current_memory /export:dump_mem_lua /export:dump_c_mem /export:memory_info_dump /export:malloc_used_memory /export:malloc_memory_block /export:skynet_socket_send /export:skynet_socket_send_lowpriority /export:skynet_socket_listen /export:skynet_socket_connect /export:skynet_socket_bind /export:skynet_socket_close /export:skynet_socket_shutdown /export:skynet_socket_start /export:skynet_socket_nodelay /export:skynet_socket_udp /export:skynet_socket_udp_connect /export:skynet_socket_udp_send /export:skynet_socket_udp_address /export:skynet_socket_info /export:socket_info_release /export:skynet_harbor_start /export:skynet_realloc /export:skynet_main /export:skynet_detach_queue /export:skynet_dispatch_queue %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -141,7 +141,7 @@
       <AdditionalLibraryDirectories>$(OutDir)</AdditionalLibraryDirectories>
       <ModuleDefinitionFile>
       </ModuleDefinitionFile>
-      <AdditionalOptions>/export:skynet_error /export:skynet_command /export:skynet_queryname /export:skynet_send /export:skynet_sendname /export:skynet_isremote /export:skynet_callback /export:skynet_current_handle /export:skynet_now /export:skynet_debug_memory /export:skynet_malloc /export:skynet_free  /export:skynet_lalloc /export:malloc_current_memory /export:dump_mem_lua /export:dump_c_mem /export:memory_info_dump /export:malloc_used_memory /export:malloc_memory_block /export:skynet_socket_send /export:skynet_socket_send_lowpriority /export:skynet_socket_listen /export:skynet_socket_connect /export:skynet_socket_bind /export:skynet_socket_close /export:skynet_socket_shutdown /export:skynet_socket_start /export:skynet_socket_nodelay /export:skynet_socket_udp /export:skynet_socket_udp_connect /export:skynet_socket_udp_send /export:skynet_socket_udp_address /export:skynet_socket_info /export:socket_info_release /export:skynet_harbor_start /export:skynet_realloc /export:skynet_main %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/export:skynet_error /export:skynet_command /export:skynet_queryname /export:skynet_send /export:skynet_sendname /export:skynet_isremote /export:skynet_callback /export:skynet_current_handle /export:skynet_now /export:skynet_debug_memory /export:skynet_malloc /export:skynet_free  /export:skynet_lalloc /export:malloc_current_memory /export:dump_mem_lua /export:dump_c_mem /export:memory_info_dump /export:malloc_used_memory /export:malloc_memory_block /export:skynet_socket_send /export:skynet_socket_send_lowpriority /export:skynet_socket_listen /export:skynet_socket_connect /export:skynet_socket_bind /export:skynet_socket_close /export:skynet_socket_shutdown /export:skynet_socket_start /export:skynet_socket_nodelay /export:skynet_socket_udp /export:skynet_socket_udp_connect /export:skynet_socket_udp_send /export:skynet_socket_udp_address /export:skynet_socket_info /export:socket_info_release /export:skynet_harbor_start /export:skynet_realloc /export:skynet_main /export:skynet_detach_queue /export:skynet_dispatch_queue %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -162,7 +162,7 @@
       </ModuleDefinitionFile>
       <AdditionalLibraryDirectories>$(OutDir)</AdditionalLibraryDirectories>
       <AdditionalDependencies>libuv.lib;lua.lib;ws2_32.lib;iphlpapi.lib;psapi.lib;Userenv.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalOptions>/export:skynet_error /export:skynet_command /export:skynet_queryname /export:skynet_send /export:skynet_sendname /export:skynet_isremote /export:skynet_callback /export:skynet_current_handle /export:skynet_now /export:skynet_debug_memory /export:skynet_malloc /export:skynet_free  /export:skynet_lalloc /export:malloc_current_memory /export:dump_mem_lua /export:dump_c_mem /export:memory_info_dump /export:malloc_used_memory /export:malloc_memory_block /export:skynet_socket_send /export:skynet_socket_send_lowpriority /export:skynet_socket_listen /export:skynet_socket_connect /export:skynet_socket_bind /export:skynet_socket_close /export:skynet_socket_shutdown /export:skynet_socket_start /export:skynet_socket_nodelay /export:skynet_socket_udp /export:skynet_socket_udp_connect /export:skynet_socket_udp_send /export:skynet_socket_udp_address /export:skynet_socket_info /export:socket_info_release /export:skynet_harbor_start /export:skynet_realloc /export:skynet_main %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/export:skynet_error /export:skynet_command /export:skynet_queryname /export:skynet_send /export:skynet_sendname /export:skynet_isremote /export:skynet_callback /export:skynet_current_handle /export:skynet_now /export:skynet_debug_memory /export:skynet_malloc /export:skynet_free  /export:skynet_lalloc /export:malloc_current_memory /export:dump_mem_lua /export:dump_c_mem /export:memory_info_dump /export:malloc_used_memory /export:malloc_memory_block /export:skynet_socket_send /export:skynet_socket_send_lowpriority /export:skynet_socket_listen /export:skynet_socket_connect /export:skynet_socket_bind /export:skynet_socket_close /export:skynet_socket_shutdown /export:skynet_socket_start /export:skynet_socket_nodelay /export:skynet_socket_udp /export:skynet_socket_udp_connect /export:skynet_socket_udp_send /export:skynet_socket_udp_address /export:skynet_socket_info /export:socket_info_release /export:skynet_harbor_start /export:skynet_realloc /export:skynet_main /export:skynet_detach_queue /export:skynet_dispatch_queue %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -194,7 +194,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\skynet-src\malloc_hook.c" />
-    <ClCompile Include="..\skynet-src\skynet_console.c" />
     <ClCompile Include="..\skynet-src\skynet_env.c" />
     <ClCompile Include="..\skynet-src\skynet_error.c" />
     <ClCompile Include="..\skynet-src\skynet_handle.c" />

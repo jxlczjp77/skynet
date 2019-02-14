@@ -1,4 +1,4 @@
-#ifndef SKYNET_SERVER_H
+﻿#ifndef SKYNET_SERVER_H
 #define SKYNET_SERVER_H
 
 #include <stdint.h>

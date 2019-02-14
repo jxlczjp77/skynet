@@ -801,6 +801,14 @@ function skynet.memlimit(bytes)
 	skynet.memlimit = nil	-- set only once
 end
 
+function skynet.detachqueue()
+	c.detachqueue()
+end
+
+function skynet.dispatchqueue()
+	c.dispatchqueue()
+end
+
 -- Inject internal debug framework
 local debug = require "skynet.debug"
 debug.init(skynet, {

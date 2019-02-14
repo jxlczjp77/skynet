@@ -13,7 +13,6 @@
 #include <lauxlib.h>
 #include <signal.h>
 #include <assert.h>
-void RedirectIOToConsole();
 
 static int
 optint(const char *key, int opt) {
@@ -121,9 +120,6 @@ static const char * load_config = "\
 int
 skynet_main(int argc, char *argv[]) {
 	const char * config_file = NULL ;
-	if (argc > 1 && strcmp(argv[1], "--show-console") == 0) {
-		RedirectIOToConsole();
-	}
 	if (argc > 0) {
 		config_file = argv[0];
 	} else {
