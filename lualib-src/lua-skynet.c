@@ -321,15 +321,15 @@ lsend(lua_State *L) {
 
 static int
 ldetachqueue(lua_State *L) {
-	struct skynet_context * context = lua_touserdata(L, lua_upvalueindex(1));
-	skynet_detach_queue(context);
+	int handle = lua_tointeger(L, -1);
+	skynet_detach_queue(handle);
 	return 0;
 }
 
 static int
 ldispatchqueue(lua_State *L) {
-	struct skynet_context * context = lua_touserdata(L, lua_upvalueindex(1));
-	skynet_dispatch_queue(context);
+	int handle = lua_tointeger(L, -1);
+	skynet_dispatch_queue(handle);
 	return 0;
 }
 

@@ -98,6 +98,7 @@ void skynet_globalmq_remove(struct message_queue *mq) {
 			pre_mq->next = mq->next;
 			if (q->tail == mq) {
 				q->tail = pre_mq;
+				assert(mq->next == NULL);
 			}
 		}
 	}

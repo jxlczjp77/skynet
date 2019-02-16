@@ -31,8 +31,8 @@ const char * skynet_command(struct skynet_context * context, const char * cmd , 
 uint32_t skynet_queryname(struct skynet_context * context, const char * name);
 int skynet_send(struct skynet_context * context, uint32_t source, uint32_t destination , int type, int session, void * msg, size_t sz);
 int skynet_sendname(struct skynet_context * context, uint32_t source, const char * destination , int type, int session, void * msg, size_t sz);
-void skynet_detach_queue(struct skynet_context * ctx);
-void skynet_dispatch_queue(struct skynet_context * ctx);
+void skynet_detach_queue(uint32_t handle);
+void skynet_dispatch_queue(uint32_t handle);
 
 int skynet_isremote(struct skynet_context *, uint32_t handle, int * harbor);
 

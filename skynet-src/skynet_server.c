@@ -842,12 +842,20 @@ skynet_sendname(struct skynet_context * context, uint32_t source, const char * a
 }
 
 void
-skynet_detach_queue(struct skynet_context * ctx) {
-	skynet_mq_detach(ctx->queue);
+skynet_detach_queue(uint32_t handle) {
+	struct skynet_context * ctx = skynet_handle_grab(handle);
+	if (ctx != NULL) {
+		skynet_mq_detach(ctx->queue);
+		skynet_context_release(ctx);
+	}
 }
 
 void
-skynet_dispatch_queue(struct skynet_context * ctx) {
+skynet_dispatch_queue(uint32_t handle) {
+	struct skynet_context * ctx = skynet_handle_grab(handle);
+	if (ctx == NULL) {
+		return;
+	}
 	struct message_queue *q = ctx->queue;
 	struct skynet_message msg;
 	while (skynet_mq_pop(q, &msg) == 0) {
@@ -857,6 +865,7 @@ skynet_dispatch_queue(struct skynet_context * ctx) {
 			dispatch_message(ctx, &msg);
 		}
 	}
+	skynet_context_release(ctx);
 }
 
 uint32_t 
