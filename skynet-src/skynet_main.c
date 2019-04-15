@@ -13,6 +13,7 @@
 #include <lauxlib.h>
 #include <signal.h>
 #include <assert.h>
+#include <pthread.h>
 
 static int
 optint(const char *key, int opt) {
@@ -115,24 +116,23 @@ static const char * load_config = "\
 	return result\n\
 ";
 
-int
-main(int argc, char *argv[]) {
-	const char * config_file = NULL ;
-	if (argc > 1) {
-		config_file = argv[1];
-	} else {
-		fprintf(stderr, "Need a config file. Please read skynet wiki : https://github.com/cloudwu/skynet/wiki/Config\n"
-			"usage: skynet configfilename\n");
-		return 1;
-	}
+
+static void *
+thread_main(void *p) {
+	skynet_start((struct skynet_config *)p);
+	skynet_globalexit();
+	luaS_exitshr();
+	return NULL;
+}
+
+LUALIB_API int lmain(lua_State *_L) {
+	const char * config_file = luaL_checkstring(_L, 1);
 
 	luaS_initshr();
 	skynet_globalinit();
 	skynet_env_init();
 
-	sigign();
-
-	struct skynet_config config;
+	struct skynet_config *config = malloc(sizeof(struct skynet_config));
 
 	struct lua_State *L = luaL_newstate();
 	luaL_openlibs(L);	// link lua lib
@@ -143,26 +143,40 @@ main(int argc, char *argv[]) {
 
 	err = lua_pcall(L, 1, 1, 0);
 	if (err) {
-		fprintf(stderr,"%s\n",lua_tostring(L,-1));
+		size_t sz = 0;
+        const char *error = lua_tolstring(L, -1, &sz);
+		lua_pushlstring(_L, error, sz);
 		lua_close(L);
-		return 1;
+		lua_error(_L);
 	}
 	_init_env(L);
 
-	config.thread =  optint("thread",8);
-	config.module_path = optstring("cpath","./cservice/?.so");
-	config.harbor = optint("harbor", 1);
-	config.bootstrap = optstring("bootstrap","snlua bootstrap");
-	config.daemon = optstring("daemon", NULL);
-	config.logger = optstring("logger", NULL);
-	config.logservice = optstring("logservice", "logger");
-	config.profile = optboolean("profile", 1);
+	config->thread =  optint("thread",8);
+	config->module_path = optstring("cpath","./cservice/?.so");
+	config->harbor = optint("harbor", 1);
+	config->bootstrap = optstring("bootstrap","snlua bootstrap");
+	config->daemon = optstring("daemon", NULL);
+	config->logger = optstring("logger", NULL);
+	config->logservice = optstring("logservice", "logger");
+	config->profile = optboolean("profile", 1);
 
 	lua_close(L);
 
-	skynet_start(&config);
-	skynet_globalexit();
-	luaS_exitshr();
+	pthread_t pid;
+	if (pthread_create(&pid,NULL, thread_main, config)) {
+		luaL_error(_L, "Create sncore main thread failed");
+	}
 
 	return 0;
 }
+
+LUALIB_API int luaopen_sncore(lua_State *L) {
+    luaL_Reg l[] = {
+        { "start", lmain },
+        { NULL, NULL },
+    };
+    luaL_checkversion(L);
+    luaL_newlib(L, l);
+    return 1;
+}
+
