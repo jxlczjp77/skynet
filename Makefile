@@ -12,7 +12,6 @@ CFLAGS = -g -O2 -Wall -I$(LUA_INC) $(MYCFLAGS)
 
 LUA_STATICLIB := 3rd/lua/liblua.a
 LUA_LIB ?= $(LUA_STATICLIB)
-LUA_SO = 3rd/lua/liblua.so
 LUA_INC ?= 3rd/lua
 LUA_SHARED_LIB = -L3rd/lua/ -llua
 
@@ -73,17 +72,25 @@ LUA_CLIB_SKYNET = \
   lua-datasheet.c \
   \
 
-SKYNET_SRC = skynet_main.c skynet_handle.c skynet_module.c skynet_mq.c \
+SNCORE_SRC = skynet_handle.c skynet_module.c skynet_mq.c \
   skynet_server.c skynet_start.c skynet_timer.c skynet_error.c \
   skynet_harbor.c skynet_env.c skynet_monitor.c skynet_socket.c socket_server.c \
   malloc_hook.c skynet_daemon.c skynet_log.c
-
+  
 all : \
+  $(SKYNET_BUILD_PATH)/skynet \
+  $(SKYNET_BUILD_PATH)/lskynet.so \
   $(SKYNET_BUILD_PATH)/sncore.so \
   $(foreach v, $(CSERVICE), $(CSERVICE_PATH)/$(v).so) \
   $(foreach v, $(LUA_CLIB), $(LUA_CLIB_PATH)/$(v).so) 
 
-$(SKYNET_BUILD_PATH)/sncore.so : $(foreach v, $(SKYNET_SRC), skynet-src/$(v)) $(MALLOC_STATICLIB)
+$(SKYNET_BUILD_PATH)/skynet : $(LUA_CLIB_PATH) sncore.so
+	$(CC) $(CFLAGS) -o $@ skynet-src/skynet_main_.c -Iskynet-src $(LDFLAGS) $(EXPORT) $(SKYNET_LIBS) $(SKYNET_DEFINES) $(LUA_SHARED_LIB) sncore.so
+
+$(SKYNET_BUILD_PATH)/lskynet.so : $(LUA_CLIB_PATH) sncore.so
+	$(CC) $(CFLAGS) $(SHARED) -o $@ skynet-src/skynet_main.c -Iskynet-src $(LDFLAGS) $(EXPORT) $(SKYNET_LIBS) $(SKYNET_DEFINES) $(LUA_SHARED_LIB) sncore.so
+
+$(SKYNET_BUILD_PATH)/sncore.so : $(foreach v, $(SNCORE_SRC), skynet-src/$(v)) $(MALLOC_STATICLIB)
 	$(CC) $(CFLAGS) $(SHARED) -o $@ $^ -Iskynet-src -I$(JEMALLOC_INC) $(LDFLAGS) $(EXPORT) $(SKYNET_LIBS) $(SKYNET_DEFINES) $(LUA_SHARED_LIB)
 
 $(LUA_CLIB_PATH) :

@@ -1,4 +1,4 @@
-﻿#include "skynet.h"
+#include "skynet.h"
 
 #include "skynet_imp.h"
 #include "skynet_env.h"
@@ -13,7 +13,6 @@
 #include <lauxlib.h>
 #include <signal.h>
 #include <assert.h>
-#include <pthread.h>
 
 static int
 optint(const char *key, int opt) {
@@ -87,8 +86,7 @@ int sigign() {
 
 static const char * load_config = "\
 	local result = {}\n\
-	local config_name, env = ...\n\
-	local function getenv(name) return assert(env[name] or os.getenv(name), [[os.getenv() failed: ]] .. name) end\n\
+	local function getenv(name) return assert(os.getenv(name), [[os.getenv() failed: ]] .. name) end\n\
 	local sep = package.config:sub(1,1)\n\
 	local current_path = [[.]]..sep\n\
 	local function include(filename)\n\
@@ -111,28 +109,30 @@ static const char * load_config = "\
 		current_path = last_path\n\
 	end\n\
 	setmetatable(result, { __index = { include = include } })\n\
+	local config_name = ...\n\
 	include(config_name)\n\
 	setmetatable(result, nil)\n\
 	return result\n\
 ";
 
-
-static void *
-thread_main(void *p) {
-	skynet_start((struct skynet_config *)p);
-	skynet_globalexit();
-	luaS_exitshr();
-	return NULL;
-}
-
-LUALIB_API int lmain(lua_State *_L) {
-	const char * config_file = luaL_checkstring(_L, 1);
+int
+main(int argc, char *argv[]) {
+	const char * config_file = NULL ;
+	if (argc > 1) {
+		config_file = argv[1];
+	} else {
+		fprintf(stderr, "Need a config file. Please read skynet wiki : https://github.com/cloudwu/skynet/wiki/Config\n"
+			"usage: skynet configfilename\n");
+		return 1;
+	}
 
 	luaS_initshr();
 	skynet_globalinit();
 	skynet_env_init();
 
-	struct skynet_config *config = malloc(sizeof(struct skynet_config));
+	sigign();
+
+	struct skynet_config config;
 
 	struct lua_State *L = luaL_newstate();
 	luaL_openlibs(L);	// link lua lib
@@ -140,58 +140,29 @@ LUALIB_API int lmain(lua_State *_L) {
 	int err =  luaL_loadbufferx(L, load_config, strlen(load_config), "=[skynet config]", "t");
 	assert(err == LUA_OK);
 	lua_pushstring(L, config_file);
-    lua_newtable(L);
-    if (lua_gettop(_L) > 1) {
-        luaL_checktype(_L, 2, LUA_TTABLE);
-        int top = lua_gettop(_L);
-        lua_pushnil(_L);
-        while (lua_next(_L, 2)) {
-            lua_pushvalue(_L, -2);
-            lua_pushstring(L, lua_tostring(_L, -1));
-            lua_pushstring(L, lua_tostring(_L, -2));
-            lua_settable(L, -3);
-            lua_pop(_L, 2);
-        }
-        int top2 = lua_gettop(_L);
-        printf("top1 = %d, top2 = %d\n", top, top2);
-    }
 
-	err = lua_pcall(L, 2, 1, 0);
+	err = lua_pcall(L, 1, 1, 0);
 	if (err) {
-		size_t sz = 0;
-        const char *error = lua_tolstring(L, -1, &sz);
-		lua_pushlstring(_L, error, sz);
+		fprintf(stderr,"%s\n",lua_tostring(L,-1));
 		lua_close(L);
-		lua_error(_L);
+		return 1;
 	}
 	_init_env(L);
 
-	config->thread =  optint("thread",8);
-	config->module_path = optstring("cpath","./cservice/?.so");
-	config->harbor = optint("harbor", 1);
-	config->bootstrap = optstring("bootstrap","snlua bootstrap");
-	config->daemon = optstring("daemon", NULL);
-	config->logger = optstring("logger", NULL);
-	config->logservice = optstring("logservice", "logger");
-	config->profile = optboolean("profile", 1);
+	config.thread =  optint("thread",8);
+	config.module_path = optstring("cpath","./cservice/?.so");
+	config.harbor = optint("harbor", 1);
+	config.bootstrap = optstring("bootstrap","snlua bootstrap");
+	config.daemon = optstring("daemon", NULL);
+	config.logger = optstring("logger", NULL);
+	config.logservice = optstring("logservice", "logger");
+	config.profile = optboolean("profile", 1);
 
 	lua_close(L);
 
-	pthread_t pid;
-	if (pthread_create(&pid,NULL, thread_main, config)) {
-		luaL_error(_L, "Create sncore main thread failed");
-	}
+	skynet_start(&config);
+	skynet_globalexit();
+	luaS_exitshr();
 
 	return 0;
 }
-
-LUALIB_API int luaopen_lskynet(lua_State *L) {
-    luaL_Reg l[] = {
-        { "start", lmain },
-        { NULL, NULL },
-    };
-    luaL_checkversion(L);
-    luaL_newlib(L, l);
-    return 1;
-}
-
