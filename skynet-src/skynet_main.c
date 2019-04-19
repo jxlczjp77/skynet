@@ -143,7 +143,6 @@ LUALIB_API int lmain(lua_State *_L) {
     lua_newtable(L);
     if (lua_gettop(_L) > 1) {
         luaL_checktype(_L, 2, LUA_TTABLE);
-        int top = lua_gettop(_L);
         lua_pushnil(_L);
         while (lua_next(_L, 2)) {
             lua_pushvalue(_L, -2);
@@ -152,8 +151,6 @@ LUALIB_API int lmain(lua_State *_L) {
             lua_settable(L, -3);
             lua_pop(_L, 2);
         }
-        int top2 = lua_gettop(_L);
-        printf("top1 = %d, top2 = %d\n", top, top2);
     }
 
 	err = lua_pcall(L, 2, 1, 0);

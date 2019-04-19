@@ -84,15 +84,18 @@ all : \
   $(foreach v, $(CSERVICE), $(CSERVICE_PATH)/$(v).so) \
   $(foreach v, $(LUA_CLIB), $(LUA_CLIB_PATH)/$(v).so) 
 
-$(SKYNET_BUILD_PATH)/skynet : $(LUA_CLIB_PATH) sncore.so
+$(SKYNET_BUILD_PATH)/skynet : $(LUA_CLIB_PATH) sncore.so liblua.so
 	$(CC) $(CFLAGS) -o $@ skynet-src/skynet_main_.c -Iskynet-src $(LDFLAGS) $(EXPORT) $(SKYNET_LIBS) $(SKYNET_DEFINES) $(LUA_SHARED_LIB) sncore.so
 
-$(SKYNET_BUILD_PATH)/lskynet.so : $(LUA_CLIB_PATH) sncore.so
+$(SKYNET_BUILD_PATH)/lskynet.so : $(LUA_CLIB_PATH) sncore.so liblua.so
 	$(CC) $(CFLAGS) $(SHARED) -o $@ skynet-src/skynet_main.c -Iskynet-src $(LDFLAGS) $(EXPORT) $(SKYNET_LIBS) $(SKYNET_DEFINES) $(LUA_SHARED_LIB) sncore.so
 
 $(SKYNET_BUILD_PATH)/sncore.so : $(foreach v, $(SNCORE_SRC), skynet-src/$(v)) $(MALLOC_STATICLIB)
 	$(CC) $(CFLAGS) $(SHARED) -o $@ $^ -Iskynet-src -I$(JEMALLOC_INC) $(LDFLAGS) $(EXPORT) $(SKYNET_LIBS) $(SKYNET_DEFINES) $(LUA_SHARED_LIB)
-
+	
+liblua.so: $(LUA_STATICLIB)
+	cp 3rd/lua/liblua.so ./liblua.so
+	
 $(LUA_CLIB_PATH) :
 	mkdir $(LUA_CLIB_PATH)
 
